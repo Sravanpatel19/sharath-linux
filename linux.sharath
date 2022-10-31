@@ -35,6 +35,19 @@ proc--> location where the the currently executable processes are available actu
        process: the piece of code currently executed by cpu which is loaded into RAM
        software: set of program file written to achieve required functionality
        program: piece of code 
+
+working with environment variable:
+=================================
+env ----> command is used to list all environment variables
+set up environment variable:
+COLLEGE=mgit  ----> this is type varaible declaration will not carry env to any other processes
+export OFFICE=FOURNINE  ---> this type of variable declaration will carry env to any other processes
+echo $OFFICE  ---> TO print varibale
+but if the server get restarted these envs gets wanished to prevent these envs we neeed to place them in a file file and when the server gets restarted
+and shell starts the script will execute and set as envs
+add variable in ~/config file like NAME=sravan and add the source in ~/.bashrc  filr(source config)
+
+
 vi editor:
 ===========
 G or shift+g--->end of text in the file
@@ -133,6 +146,8 @@ useradd sravan
 useradd -d /opt/sravn sravan --to specify the users home directory
 useradd -u <userid>  -g <existing group id> username
 useradd -G groupname username--> user is created and user become a meber of that group
+useradd -m <username> assign home directory to user
+useradd -s </bin/sh or /bin/bash or /sbin/nologin> <username> assign shell  to user
 
 working with usermod command:
 =============================
@@ -195,45 +210,19 @@ read=r=4, write=w=2 ,ecxecute=x=1 rw=4 rwx=7
   rpm-->redhat package manager -->86*32--> 32 bit operating system which can support the 32 bits of data processing at a time by proccessor noarch-->mean operating system architecture indepedent
   rpm -qa --> query all installed packages
   rpm -ivh <package name>  ---> install the package (i=install  v=verbose h=hash tags output )
+  rpm -uvh <package name>   ---> update the package  (u=update)
   rpm -e <package name>  ---> remove the package (e=erase)
   rpm -qf <config file location> --> to query the particular file belongings to which package
   rpm -q <package name> --> to check particular file installed or not
- 
- debian packages:
- 
- 
- 
- 
-  
-  
-  
-working with apt-debian packages
-===================================
-Advanced package tool(APT), is a free-software user interface that works with core libraries to handle the installation and removal of software on Debian, and Debian-based Linux distributions.
-  
- the configuration file of apt package is /etc/apt/sources.list --> all the repository url's present in this file
- apt-cache pkgnames --> to list all available package name
- apt-get update --> used to update the repository and cache to updated versions
- apt-get upgrade   ---> used to update all the installed packages in the server
- apt-get dist-upgrade  --> to update the linux distribution
- apt-get upgrade <packageName> --only-upgrade   ---> upgrade the specific package installed
- apt-get install <packagename> --> to install packages
- apt-get remove <packagename>  --> to remove the package but it doesnot remove the configuration file which are came with package
- apt-get purge <packagename>   --> removes the packages, and also removes any configuration files related to the packages.
- apt-get autoremove -->Sometimes the packages which are automatically installed to satisfy the dependencies of other packages, are no longer needed then autoremove command is used to remove     				these kind of packages.
-apt show <package name>  --> to display details of a package. Part of this information is dependencies and you can see it in the line starting with Depends.including control file
-apt-cache depends <package_name>  ---> show dependencies of that package
 
-apt-get remove --purge <package name> --> remove package and configuration files in single shot
+  redhat package manage does not resolve dependencies issues by itself so then yum is introduced to avoid this problem 
+  it is having repository files containg the romete repository urls 
 
-apt-cache search <package name> --> shows description about package
-
-
-working with yum package in redhat:
+  working with yum package in redhat:
 ==================================
 Yellowdog Update, Modified (YUM) is a program that manages installation, updates and removal for Red Hat package manager (RPM) systems
 
- yum list installed   ---> used to list the all installed packages
+ yum list --installed   ---> used to list the all installed packages
  yum info <package name>   --used to find detailed information about that package
  yum list  --> show the all the available packages and installed packages
  yum install <package name> --> to install the package
@@ -250,6 +239,53 @@ update Update one or all packages on your system
 -------------------------------------------------
 yum update  ---> Update all packages with available updates
 yum update httpd  ---> Update the httpd package (if available)
+ 
+ working with debian packages:
+ ===============================
+ dpkg -l ---> to query list all packages installed
+ dpkg -l <package name>    ---> to query particular package installed or not 
+ dpkg -i <package name>    ---> to install dpkg package 
+ dpkg -r <package name>    ----> to remove dpkg package
+ dpkg -s <package name>    ----> to check status whether installed or not or any issue
+
+working with apt-debian packages:
+===================================
+Advanced package tool(APT), is a free-software user interface that works with core libraries to handle the installation and removal of software on Debian, and Debian-based Linux distributions.
+  
+ the configuration file of apt package is /etc/apt/sources.list --> all the repository url's present in this file
+
+apt:
+---
+ apt is user friendly and easily understandable output 
+  
+  apt update  --> update apt repo
+  apt upgrade  ---> update all installed packages
+  apt upgrade <package name> ---> update particular package installed 
+  apt install <package name>   --> install package
+  apt remove <package name>    --> remove package
+  apt search <package name>   ---> to search package is available or not in apt repo
+  apt list --installed   --> list all installed packages 
+  apt list --installed <package name>  --to see particular package installed or not
+
+apt-get :
+---------
+
+ apt-cache pkgnames --> to list all available package name
+ apt-get update --> used to update the repository and cache to updated versions
+ apt-get upgrade   ---> used to update all the installed packages in the server
+ apt-get dist-upgrade  --> to update the linux distribution
+ apt-get upgrade <packageName> --only-upgrade   ---> upgrade the specific package installed
+ apt-get install <packagename> --> to install packages
+ apt-get remove <packagename>  --> to remove the package but it doesnot remove the configuration file which are came with package
+ apt-get purge <packagename>   --> removes the packages, and also removes any configuration files related to the packages.
+ apt-get autoremove -->Sometimes the packages which are automatically installed to satisfy the dependencies of other packages, are no longer needed then autoremove command is used to remove     				these kind of packages.
+apt show <package name>  --> to display details of a package. Part of this information is dependencies and you can see it in the line starting with Depends.including control file
+apt-cache depends <package_name>  ---> show dependencies of that package
+
+apt-get remove --purge <package name> --> remove package and configuration files in single shot
+
+apt-cache search <package name> --> shows description about package
+
   
 working with tcp and udp protocols and ports:
 ===============================================
@@ -377,8 +413,8 @@ ssh -i <private key location> username@ipaddress
 ssh -i <private key location> username@ipaddress -p <port number> --> if port forwarded
 
  
- text processing tools
- ==========================
+text processing tools:
+=====================
 1) tr
 2)awk 
 3)sed
@@ -397,7 +433,7 @@ grep: to to search the string in the content
 grep <string> <filename> --> to search the string
 grep -i <string> <filename>  --> to ingnore the case sensitive
 grep -v <string> <filename>  --> to get the the output except the string line
-grep -ir <string> <filename>  ---> to search the string recurssively
+grep -ir <string> <directory_name>  ---> to search the string recurssively
  ^ --> begining of the line
  $  --> end of the line
  ^$ --> balnk lines
@@ -405,96 +441,91 @@ grep -ir <string> <filename>  ---> to search the string recurssively
  grep "^rsra" <filename> --> shows the lines which begins with sra
  grep "$kumar" <filename>  --> shows the lins ends with kumar
  grep "^$" <filename> -->shows the blank lines
- 
+
+linux booting process:
+=====================
+1)BIOS POST  
+2)MBR
+3)GRUB
+4)kernel
+5)init
+6)RUNLEVEL
+
+/etc/rcN.d. (Replace the N with the run-level)
+In each run-level you will find a series of if links pointing to start-up scripts located in /etc/init.d. 
+The names of these links all start as either K or S, followed by a number. 
+If the name of the link starts with an S, then that indicates the service will be started when you go into that run level.
+ If the name of the link starts with a K, the service will be killed (if running).
+there are 8 run levels means mode of server
+
+RUNLEVEL:
+========
+0)[ init 0 ]-POWEROFF
+1)[ init 1 ]-sigle user mode with no network facility available
+2)[ init 2 ]-Multiple user mode with no NFS(network file system).no network facility
+            **{A Network File System (NFS) allows remote hosts to mount file systems over a network and interact with those file systems as though they are mounted locally. }
+3)[ init 3 ]-Multiple user mode under the command line interface and not under the graphical user interface with  network
+4)[ init 4]– User-definable.(some research purpose)
+            **{ Reserved for a local configuration. Special tasks such as machine tool handling or lab equipment. May include windowing if the system manager configures it.}
+            **Most systems still reserved level 4 for the system manager's use.
+5)[ init 5 ]– Multiple user mode under GUI (graphical user interface) and this is the standard runlevel for most of the LINUX based systems.
+6)[ init 6 ]– Reboot which is used to restart the system.  
+7)[ init 7 ]-maintance mode 
+  
+
+ working with find & locate :
+ ===========================
+ find:
+ -----
+ find / -name tecmint.txt  ---> to find file named  tecmint.txt dir recurssively
+ find / -iname tecmint.txt  --->to find file named  tecmint.txt dir recurssively ignore case sensitive
+ find / -type d -name Tecmint   ---> to Find all directories whose name is Tecmint in / directory.
+ find / -user root -name tecmint.txt  -->To find all or single files called tecmint.txt under / root directory of owner root.
+ find /home -user tecmint  ---> To find all files that belong to user Tecmint under /home directory.
+ find /home -group developer  -->To find all files that belong to the group Developer under /home directory.
+  
+ locate:
+ ------
+ locate sravan.txt  ----> to find file named  sravan.txt dir recurssively
+ locate -i *.txt  ---> ignore case sensitive
+ **Since locate command relies on a database called mlocate. 
+   The said database needs to be updated regularly for the command utility to work
+   efficiently,To update the mlocate database, you use a utility called updatedb. 
+   It should be noted that you will need superuser privileges for this to work properly, 
+
+sudo updatedb    ---->to update mlocate database
+
+hack with grep:
+---------------
+grep -ir <string> <directory> to search a word in dir in any file recurssively
+grep -ir listen /etc   ---> shows matched word and file name with full path of file  recurssivesly
 
 
- 
- for domain based virtual hosting 
- i have installed nginx and edited the sites configuration files
- created a site1.com site2.com files in the location of /etc/nginx/sites-available
+file compression and archival:
+-----------------------------
 
- added below content in site1.com 
- 
- server {
-        listen 80;
-        listen [::]:80;
-        root /var/www/html/site1;
-        index index.php index.html index.htm index.nginx-debian.html;
 
-        server_name site1.com;
 
-        location / {
-        try_files $uri $uri/ =404;
-        }
-       }
 
-added below content in site2.com
-  server {
-        listen 80;
-        listen [::]:80;
-        root /var/www/html/site2;
-        index index.php index.html index.htm index.nginx-debian.html;
 
-        server_name site2.com;
 
-        location / {
-        try_files $uri $uri/ =404;
-        }
-       }
- created a required directories,links,and hosted sites added domains in /etc/hosts file and working fine
- 
-for port based virtual hosting 
-added below content in the configuration file
+IO Redirection:
+----------------
+>   ---> overwrites the content
+>>  ---> appends the content
 
-server {
-        listen 8080;
-        listen [::]:8080;
-        root /var/www/html/site1;
-        index index.php index.html index.htm index.nginx-debian.html;
+Redirect stdoutput  echo "hi sravan" > sravan.txt      --> overwrites data
+Redirect stdout echo "hi sravan" >> sravan.txt         --> appends data
 
-        server_name site1.com;
+Redirect  stderror cat srvan.txt 2> error.txt   --> overwrites err data
+redirect  stderro cat srvan.txt 2>> error.txt   --> appends err data
+not to print on terminal and not to redirect to file     cat srvan.txt 2>> /dev/null
 
-        location / {
-        try_files $uri $uri/ =404;
-        }
-       }
+tee command is used to redirect output to file  nad print on the screen
 
-server {
-        listen 9090;
-        listen [::]:9090;
-        root /var/www/html/site1;
-        index index.php index.html index.htm index.nginx-debian.html;
+echo "sravan is devops guys" | tee sravan.txt   
+grep -ir listen /etc | tee err.txt
 
-        server_name site1.com;
-
-        location / {
-        try_files $uri $uri/ =404;
-        }
-       }
- created required directories,links and hosted the websites
- 
- 
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
 
 
 
