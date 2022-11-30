@@ -61,10 +61,16 @@ p---> paste  the line
 yw---> copy the word
 ===========================
 du -sh <directory name> ---> check actual size of  the directory with all its content
+
+working with DNS:
+=================
 ping--->pocket internet grooper
 send pockets of data to a server and receive pockets
-/etc/hosts--->file which is having list of mappings of ipaddresses and name of the servers
-resolve.conf--> this file having the dns system methodology configuration ...first preferances to the hosts file and dns system
+
+/etc/hosts  -->file which is having list of mappings of ipaddresses and name of the servers
+/etc/resolve.conf --> this file having the nameserver entry (dns server) ...first preferances to the hosts file and dns system
+/etc/nsswitch.conf --> dns query methodology preference by default first preferences to the hosts file and dns server which is having entry 
+                      in /etc/resolve.conf we can change the preference by changing the hosts section in the file
 
 dig-->stands for domain information groper used to debugg the dns system 
 ex: dig  www.yahoo.com +trace -->trace the dns query system
@@ -83,11 +89,79 @@ nslookup -->stands for  name server lookup for  debuugging of dns  ...name to ip
       nslookup -type=mx sravan.com
       nslookup -type=txt sravan.com
         
-   reverse ns lookup --> nslookup <ipaddress>
+reverse ns lookup --> nslookup <ipaddress>
                          
 tracepath google.com ----> it show  tracking path of request
  
-ext2:when file is corrupted while entering the file system when system crashes will not identifise the where actually correpted 
+working with dns query system:
+==============================
+dns server has cache for domain ip addresses.this cache can live up to ttl value mentioned ttl means time to live 
+client -->/etc/hosts-->/etc/resolve.conf(dns server address)-->dns server
+the preference of this dns query is configured in a file /etc/nsswitch.conf
+we can change the routing of dns query preference either first goes to local host file or directly to the dns server which is configured in /etc/resolve.conf
+active directory or LDAP(light weight directory active protocal) it means instead of having user authentication credentials in local, having in the central database ..so when user wants log in into system it first search in the local as preferences given /etc/ns.switch.conf then goes to central database  ..we can chage the preferences in this file to modify the preference..  
+ nsswitch.conf-->nameserviceswitch.conf
+
+ types of records:
+ =================
+ A    --> A record, point to the IPV4 address for a domain 
+ AAA  --> AAA record points to IPV6 addresses for a domain.
+ CNAME -->  "canonical name"—record points a domain name (an alias) to another domain. In a CNAME record, the alias doesn't point to an IP address. And the domain name that the alias points to is the canonical name.
+             For ex the subdomain ng.example.com can point to example.com using CNAME. Here example.com points to the actual IP address using an A record.
+nsrecord:  A nameserver (NS) record specifies the authoritative DNS server for a domain. 
+MX record: A mail exchange (MX) record, is a DNS record type that shows where emails for a domain should be routed to
+ 
+other record types:
+-----------------
+SRV record   ---> Using this DNS record type, it's possible to store the IP address and port for specific services.
+PTR record: A pointer (PTR) record provides a domain name for reverse lookup. It's the opposite of an A record as it provides the domain name linked to an IP address instead of the IP address for a domain.
+SOA record: SOA stands for "start of authority." It's an important DNS record type that stores admin information about a domain. This information includes the email address of the admin and when the domain was last updated.
+DNAME: The full meaning of DNAME is "delegation name." This record type works very similarly to CNAME; however, it points all the subdomains for the alias to the canonical domain name.
+
+
+working with storage,partitions and formating of a disk:
+ =========================================================
+
+ The MBR, boot sectors and partition table :
+ -----------------------------------------
+The information about how a hard disk has been partitioned is stored in its first sector (that is, the first sector of the first track on the first disk surface). 
+The first sector is the master boot record (MBR) of the disk; this is the sector that the BIOS reads in and starts when the machine is first booted.
+The master boot record contains a small program that reads the partition table, checks which partition is active (that is, marked bootable), and reads the first sector of that partition, the partition's boot sector (the MBR is also a boot sector, but it has a special status and therefore a special name). 
+This boot sector contains another small program that reads the first part of the operating system stored on that partition (assuming it is bootable), and then starts it
+ 
+ storage types :
+ ================
+ 1)DAS (Directly Attached Storage) ---> like USB
+ 2)NAS (Network Attached Storage)----> like NFS
+ 3)SAN (Storage Area Network) --->
+
+ partition types:
+ ---------------
+ 1)primary partition --> used to boot the os limited 
+ 2)extended partitions --> diretcly not used but used to host logical partitions
+ 3)logical partitions  --> 
+
+
+
+ lsblk--> list the all blocks attached to server
+ blkid  <devicename>--> to see the device id  and type of file system software
+ df -h --> check datailed view of disk total,free,used space 
+ fdisk -l --> to check all the devices and all partitions in indivisual disk
+ fdisk -n --> new partition
+ fdisk -m -->help
+ 
+ mkfs -t <filesystemtype> <devicename> --> to make file system on top of harddrive
+ mount <devicename> <mount point> --> to mount device 
+ umount <devicename> 
+ 
+ if we mount manually using these commands then when the server gets restarted then mount points of devices wanished automatic mounting will not happen
+ to get auto mount when the restarted we have configure the device block and mount point in the /etc/fstab file
+ ex:
+    	UUID=<DEVICEID> <MOUNTPOINT> <TYPEOFFILESYSTEM> defaults,nofails
+      
+working with filesystem:
+========================
+ext2: when file is corrupted while entering the file system when system crashes will not identifise the where actually correpted 
 ext3: The main benefit of ext3 is that it allows journaling
 Journaling has a dedicated area in the file system, where all the changes are tracked. 
 When the system crashes, the possibility of file system corruption is less because of journaling.
@@ -98,10 +172,15 @@ When the system crashes, the possibility of file system corruption is less becau
 /etc/fstab fields: 1)uuid or name of disk or label
         2)mountpoint
         3)type of filesystem
-        4)default or noexec ,ro,noauto,nosuid,rw,nouser -->additional specfications for disk moutnig 
-        5)0
-        6)0
+        4)default or noexec ,ro,noauto,nosuid,rw,nouser -->additional specfications for disk moutnig (mounting options)
+        5)0  ---> dump back up
+        6)0   ---> check file system while booting 
+
 LABEL=MY_BACKUP /mount/point           ext4    defaults        0       2
+or
+/dev/sda5  /mount/point           ext4    defaults        0       2
+10.10.0.10:/backups /var/backups  nfs      defaults    0       0
+
 e2label /dev/sda5 "MY_BACKUP" --> to create label
 mount -t ext4 -o ro /dev/xvda /mount/point -->mount as read only
 mount -a -->make sure that all the devices configured inthe /etc/fstab is mounted
@@ -110,14 +189,6 @@ mount -a -->make sure that all the devices configured inthe /etc/fstab is mounte
 Journaling has a dedicated area in the file system, where all the changes are tracked. 
 When the system crashes, the possibility of file system corruption is less because of journaling.
 
-working with dns query system:
-==============================
-dns server has cache for domain ip addresses.this cache can live up to ttl value mentioned ttl means time to live 
-client -->/etc/hosts-->/etc/resolve.conf(dns server address)-->dns server
-the preference of this dns query is configured in a file /etc/nsswitch.conf
-we can change the routing of dns query preference either first goes to local host file or directly to the dns server which is configured in /etc/resolve.conf
-active directory or LDAP(light weight directory active protocal) it means instead of having user authentication credentials in local, having in the central database ..so when user wants log in into system it first search in the local as preferences given /etc/ns.switch.conf then goes to central database  ..we can chage the preferences in this file to modify the preference..  
- nsswitch.conf-->nameserviceswitch.conf
  
  working with softlink and hard link:
  =====================================
@@ -133,11 +204,23 @@ command: ln <sourcefile> <destinationfile>
 
 load on the server: the no of proceesses currently waiting to be executed by cpu because 1 cpu can only execute 1 process at a time ..more the processes are waiting to be executed means server is loaded heavily and lesser the no of processes are waiting means lighter load on the server 
 command: uptime --> used to know the when the server got up and averege load on the server
+
+system accounts types:
+----------------------
+1) normal user(uid>1000){/home/$USER}
+2) root user (uid&gid=0)
+3) system user(1<uid<1000)
+4) service user {/var/lib/name of user}
+
 all user related information present in /etc/passwd file 
 it has several fields  1)username 2)password field 3)uid (user idenfication number) 4)gid (group identification number) 5)comment field about user 6) user's home directory 7)shell
 all the user's password related information present in the /etc/shadow file .actually users password is stored in the system using some alogarithems using one way hashing method 
 it consist of 8 feilds they are 1)username 2)hashed password 3)no of days passed since 1 jan 1980 the password was changed 4)the no days required to change password succcessively5)no of days after which the password is expired 6)the no of days before which the password expiry warning is prompted 7)no of days after which the account the is disable 8) the days after which the the account is expired
 all the groups related inforation stored in the /etc/group file.and the user who are members of which groups information also present
+
+users---> /etc/passwd
+groups---> /etc/groups
+passwords----> /etc/shadow
 
 working with useradd command:
 =============================
@@ -168,32 +251,110 @@ userdel <username>   --> to delete user
 groups <username>  --> to check the groups associated to the user
 id <username> --> to check the user info uid,gid,groups associated to the user 
 usermod -a -G <groupname> <username> ---> to add user in to a existing group
-gpasswd -d <groupname> <username> --> to remove a user from group
+gpasswd  <groupname>  ---> Set password for group
+gpasswd -d <groupname>  <username> --> to remove a user from group
 
-working with file permissions:
-================================
+normal user is not having the root user previlleges to get root user previlleges the user group is added in 
+/etc/sudoers  file  
+
+1st method:
+==========
+entry in the /etc/sudoers  file 
+------------------------------------
+
+username ALL=(ALL:ALL) ALL --> the user can get root previleges to execute /sbin directory commands then prompt for password
+ex: sravan  ALL=(ALL:ALL) ALL  --> prompt password
+    arun    ALL=(ALL:ALL) NOPASSWD:ALL  ---> no password required
+    john ALL=(root) /bin/systemctl restart NetworkManager --> specfic user and specific command
+    username ALL=(ALL) NOPASSWD: /usr/bin/apt-get , !/sbin/shutdown ---> no password prompt muliple commands , not command
+  
+to get only specific commands:
+
+ALL=(ALL:ALL) 
+Allow members of group sudo to execute any command
+--------------------------------------------------
+
+%groupname ALL=(ALL:ALL) ALL   --> prompt password
+%sudo	ALL=(ALL:ALL) ALL  --> example
+
+2nd method:
+===========
+create group and  add  group in the sudoers file 
+then add the user to that group
+
+sravan  ALL=(ALL:ALL) ALL 
+1)The first field indicates the username that the rule will apply to 
+2)The first “ALL” indicates that this rule applies to any hosts by default  to local
+3)second “ALL” indicates that the root user can run commands as all users.(User:Group)
+4)third “ALL” indicates that the root user can run commands as all groups.(User:Group)
+5)"NOPASSWORD" indicates that no to prompt for self password to authenticate
+6)The last “ALL” indicates these rules apply to all commands.
+
+working with file permissions and ownership:
+===========================================
 
 read=r=4, write=w=2 ,ecxecute=x=1 rw=4 rwx=7
  chmod 700 <filename> --> to change the file permission
  chmod -R 644 <directoryname> ---> to change the file recurrsively
+ chown <user:group> <filename>  --> to change ownership of file
+ chown -R <user.group> <directoryname>  --> to change ownership of file
    
  special permissions:
  --------------------
-  set uid(+s)(0): special set of permission which enables the executable permissions to the all users as its owner
-  set gid(+s)(4): special set of permission which enables the executable permissions to al users as its group
-  sticky bit(+t)(2): Only the owner (and root) of a file can remove the file within that directory. A common example of this is the /tmp directory:
+  set uid(+s)(4): special set of permission which enables the executable permissions to the all users as its owner
+  examples: chmod 4755 [filename] or chmod u+s [filename]
+ ----------
+/bin/chfn
+/bin/umount
+/bin/fusermount
+/bin/sudo
+/bin/newgrp
+/bin/pkexec
+/bin/passwd
+/bin/mount
+/bin/su
+/bin/gpasswd
+/bin/chsh
+
+set gid(+s)(2): special set of permission which enables the executable permissions to al users as its group
+examples:  chmod 2755 [directory name] or chmod g+s [dir name]
+---------
+  /usr/bin/expiry
+/ssh-agent
+./mlocate
+./wall
+./chage
+./dotlockfile
+./mlock
+./crontab
+./bsd-write
+
+sticky bit(+t)(1): Only the owner (and root) of a file can remove the file within that directory. A common example of this is the /tmp directory
+example: chmod 1777 [dir name] or chmod +t [dir name]
+
   SUID = 4
   SGID = 2
   Sticky = 1
   
- working with partitions and formating of a disk:
- ===================================
+ working with storage,partitions and formating of a disk:
+ =========================================================
+
+ The MBR, boot sectors and partition table :
+ -----------------------------------------
+The information about how a hard disk has been partitioned is stored in its first sector (that is, the first sector of the first track on the first disk surface). 
+The first sector is the master boot record (MBR) of the disk; this is the sector that the BIOS reads in and starts when the machine is first booted.
+The master boot record contains a small program that reads the partition table, checks which partition is active (that is, marked bootable), and reads the first sector of that partition, the partition's boot sector (the MBR is also a boot sector, but it has a special status and therefore a special name). 
+This boot sector contains another small program that reads the first part of the operating system stored on that partition (assuming it is bootable), and then starts it
+ 
  lsblk--> list the all blocks attached to server
  blkid  <devicename>--> to see the device id  and type of file system software
  df -h --> check datailed view of disk total,free,used space 
  fdisk -l --> to check all the devices and all partitions in indivisual disk
  fdisk -n --> new partition
  fdisk -m -->help
+
+
+
  
  mkfs -t <filesystemtype> <devicename> --> to make file system on top of harddrive
  mount <devicename> <mount point> --> to mount device 
@@ -317,13 +478,14 @@ iptables <options>
 --sport — Specifies the source port of the packet, using the service name, port number, or range of port numbers. The --source-port match option is synonymous with --sport. 
 -n — Displays IP addresses and port numbers in numeric format, rather than the default hostname and network service format. 
 -p — Sets the IP protocol for the rule, which can be either icmp, tcp, udp, or all,   (by default all)
+-s to specify the source address
+-d to specify the destination address
 -j -used to specify the action ALLOW,REJECT,DROP,RETURN,QUEUE
-
 REJECT — Sends an error packet back to the remote system and drops the packet. 
 ACCEPT — Allows the packet to successfully move on to its destination or another chain.
 DROP — Drops the packet without responding to the requester. The system that sent the packet is not notified of the failure. 
 
-iptables -L -n -v  (L=list, n=reolves in numeric value ,v=verbose ) , default table is the filter tables ---> list the iptable rules
+iptables -L -n -v  (L=list, n=resolves in numeric value ,v=verbose ) , default table is the filter tables ---> list the iptable rules
 iptables -L -n -v --line-number   -->print with line numbers
 
                               {n=IP addresses and port numbers will be printed in numeric format.  By default, the program will try to display them as host names, network names, or services}
@@ -334,7 +496,11 @@ iptables -F  --> to delete all the rules (F=Flush)
 
 iptables -A INPUT -p tcp/udp/icmp -j DROP ---> drop all the incoming traffic 
 commonds:
-iptables -A INPUT -p tcp -s 10.12.2.213 --dport 80 -j drop ---> drop the tcp traffic which is comming on port 80 from 10.12.2.213
+--------
+sudo iptables -A INPUT -p tcp -s 172.16.238.187 --dport 22 -j ACCEPT  --> allow ssh tcp protocal from 172.16.268.187 
+sudo iptables -A INPUT -p tcp -s 172.16.238.187 --dport 80 -j ACCEPT  --> allow tcp protocal http  traffic from 172.16.268.187
+sudo iptables -A INPUT -j DROP                                        --> to drop all traffic all types of protocals
+iptables -A INPUT -p tcp -s 10.12.2.213 --dport 80 -j DROP ---> drop the tcp traffic which is comming on port 80 from 10.12.2.213
  generlized command :
  iptables -I/A <type of chain> -p <type of protocol> -s <source address> --dport <destination port> -j <action>
  
@@ -382,7 +548,7 @@ route del -net <dest ip address> netmask 255.255.255.255 gw <gw ip> to delete th
  kill -<signal no> <pid>
  kill -9 <pid> forcefully killing the processs
  kill -2 <pid> terminating the process like manullay ctcl+c
- kill -15 <pid> sending signal as complete the process what ur doing and kill your self
+ kill -15 <pid> sending signal as complete the process what ur doing and kill your self terminate
  
  Each process is assigned a process priority, which determines how much CPU or processor time is allocated to it for execution.
 eventhough the kernel is the one which allocate the cpu time to the process in fact we can change the priority of process using nice command while execution or we can change the priority
@@ -402,7 +568,7 @@ eventhough the kernel is the one which allocate the cpu time to the process in f
  
  setup of ssh configuration
  ===========================
- create a directory .ssh under home directory of user make file permission as 700
+ create a directory .ssh under home directory of user make directory permission as 700
  create a file named authorized_keys and copy public key into it and make file permission as 600
  
  ssh-copy-id username@ipadress --> used to copy the public remotely
@@ -412,7 +578,13 @@ remote log in :
 ssh -i <private key location> username@ipaddress
 ssh -i <private key location> username@ipaddress -p <port number> --> if port forwarded
 
- 
+scp file1.txt username@hostname:/home/sravan   ---> to copy the (send) from local to romote server
+scp username@hostname:~/file1.txt ./testdir/   ---> to copy from reomte to to local(download)
+
+flags:
+-r  --> copy directory
+-p  --> preserve the ownership and permissions
+-i  --> to specify identity file (private key location)
 text processing tools:
 =====================
 1) tr
@@ -439,7 +611,7 @@ grep -ir <string> <directory_name>  ---> to search the string recurssively
  ^$ --> balnk lines
  
  grep "^rsra" <filename> --> shows the lines which begins with sra
- grep "$kumar" <filename>  --> shows the lins ends with kumar
+ grep "kumar.$" <filename>  --> shows the lins ends with kumar
  grep "^$" <filename> -->shows the blank lines
 
 linux booting process:
@@ -483,7 +655,9 @@ RUNLEVEL:
  find / -user root -name tecmint.txt  -->To find all or single files called tecmint.txt under / root directory of owner root.
  find /home -user tecmint  ---> To find all files that belong to user Tecmint under /home directory.
  find /home -group developer  -->To find all files that belong to the group Developer under /home directory.
-  
+ find /home -perm 555 
+ find / -type f -name Tecmint  ---> to Find all files whose name is Tecmint in / directory.
+ 
  locate:
  ------
  locate sravan.txt  ----> to find file named  sravan.txt dir recurssively
@@ -499,6 +673,8 @@ hack with grep:
 ---------------
 grep -ir <string> <directory> to search a word in dir in any file recurssively
 grep -ir listen /etc   ---> shows matched word and file name with full path of file  recurssivesly
+grep -ir "error.$" /var/log  --> shows all words which ends with error  in /var/log
+grep -ir "^grafana"  /var/log --> shows all words which starts with grafana  in /var/log
 
 
 file compression and archival:
@@ -521,12 +697,161 @@ Redirect  stderror cat srvan.txt 2> error.txt   --> overwrites err data
 redirect  stderro cat srvan.txt 2>> error.txt   --> appends err data
 not to print on terminal and not to redirect to file     cat srvan.txt 2>> /dev/null
 
-tee command is used to redirect output to file  nad print on the screen
+tee command is used to redirect output to file as well as  print on the screen
 
 echo "sravan is devops guys" | tee sravan.txt   
 grep -ir listen /etc | tee err.txt
 
+networking in linux:
+===================
+interfaces and switches and routes,route entry
 
 
 
 https://youtu.be/TsKE50hf4PU  -->learn linux link
+http error code 
+client side errors and server side errors
+logs errors --server side errors 
+log rotation
+top and htop and egrep
+openssl
+logical volumes
+increase inodes in partition
+lost aws ssh keys
+while booting run a process  how to run a custom process
+
+A process in running state means that it is running or it’s ready to run.
+
+The process is in a sleeping state when it is waiting for a resource to be available.
+
+A process in Interruptible sleep will wakeup to handle signals, whereas a process in Uninterruptible sleep will not.
+
+A process enters a stopped state when it receives a stop signal.
+
+Zombie state is when a process is dead but the entry for the process is still present in the table.
+
+.htaccess
+lukx software
+how to set password protect file in linux
+how to recover a keys in linux if u lost keys --ami or mount another server root
+how to take backup etcd and run backup etcd as cluster 
+acls in linux ,helm charts in k8S
+how to check the particular port connectivity to server --> telnet
+what is connetction time out error? 
+how to connect from windows clinets?ftp and nfs?
+
+static ip connection conf and  ..
+lvm partions and fstab types of file systems? permanent mount in windows and linux 
+fstab grep egrep awk sed find
+all log files ,booting issues ,kernel selcetion
+,dhcp ,ftp,SAN,trouble shooting-->1)file system full2)file system ro 3)/boot full
+4)kernel patch problem old kernel removel and set to old kernel5 )crontab all @reeboot @hourly
+5)mail options  windows to linux file syatem share cifs
+6)
+
+6)how to mount logical vol /
+
+
+/var/log/syslog
+{
+  weekly
+  compress
+  delaycompress
+  rotate 10
+  
+}
+error codes:
+The following list describes the most common HTTP Error Codes and includes some possible resolutions.
+
+400 Bad Request
+
+This error indicates that the user's request contains incorrect syntax.
+
+401 Unauthorized
+
+This error indicates that the requested file requires authentication (a username and password).
+
+403 Forbidden
+
+This error indicates that the server will not allow the visitor to access the requested file. If a visitor receives this code unexpectedly, you should check the file's permission settings, or check whether the file has been protected.
+
+404 Not Found
+
+This error indicates that the server could not find the file that the visitor requested. This commonly occurs when a URL is mistyped.
+
+5xx Errors
+
+These errors are caused by the server being unable to fulfill an apparently valid request from a visitor. Often, you will need the help of a server administrator to investigate them.
+
+It is also important to consider that quite often, a chain of servers is handling an HTTP request, so that it may not be your server that is returning the error.
+
+500 Internal Server Error
+
+This error indicates that the server has encountered an unexpected condition. This often occurs when an application request cannot be fulfilled due to the application being configured incorrectly on the server.
+
+501 Not Implemented
+
+This error indicates that the HTTP method sent by the client is not supported by the server. This is most often caused by the server being out of date. It is a very rare error and generally requires that the web server be updated.
+
+502 Bad Gateway
+
+This error is usually due to improperly configured proxy servers. However, the problem may also arise when there is poor IP communication between back—end computers, when the client's server is overloaded, or when a firewall is functioning improperly.
+
+The first step in resolving the issue is to clear the client's cache. This action should result in a different proxy being used to resolve the web server's content.
+
+503 Service Unavailable
+
+This error occurs when the server is unable to handle requests due to a temporary overload or due to the server being temporarily closed for maintenance. The error indicates that the server will only temporarily be down. It is possible to receive other errors in place of 503.
+
+Contact the server administrator if this problem persists.
+
+504 Gateway Timeout
+
+This error occurs when a server somewhere along the chain does not receive a timely response from a server further up the chain. The problem is caused entirely by slow communication between upstream computers.
+
+To resolve this issue, contact the system administrator.
+
+505 HTTP Version Not Supported
+
+This error occurs when the server refuses to support the HTTP protocol that has been specified by the client computer. This can be caused by the protocol not being specified properly by the client computer; for example, if an invalid version number has been specified.
+
+506 Variant Also Negotiates
+
+This error indicates that the server is not properly configured. Contact the system administrator to resolve this issue.
+
+507 Insufficient Storage
+
+This error indicates that the server is out of free memory. This is most likely to occur when an application that is being requested cannot allocate the necessary system resources to run.
+
+To resolve the issue, the server's hard disk may need to be cleaned of any unnecessary documents to free up more hard disk space, its memory may need to be expanded, or it may simply need to be restarted.
+
+Contact the system administrator for more information regarding this error message.
+
+509 Bandwidth Limit Exceeded
+
+This error occurs when the bandwidth limit imposed by the system administrator has been reached. The only fix for this issue is to wait until the limit is reset in the following cycle.
+
+Consult the system administrator for information about acquiring more bandwidth.
+
+510 Not Extended
+
+This error occurs when an extension attached to the HTTP request is not supported by the web server.
+
+To resolve the issue, you may need to update the server. Consult the system administrator for more information.
+
+session needed:
+1)interfaces and ifconfig 
+2)logs and which logs respect which log and how t find error and understanding of errors and also 
+  how to debugg the error and slove it
+3)error codes 
+
+
+Awk sed grep egrep,find logrotate
+ logrotate
+ logical volumes
+
+ sessions needed from sampath anna:
+ ==================================
+ 1) iptables live session and writing rules outbount , inbound , forward ,postroute and preroute
+ 2) live session on error codes and understanding the issues and trouble shooting
+ 3)interfaces in linux 
