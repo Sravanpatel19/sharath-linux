@@ -60,7 +60,9 @@ yy --> copy the line
 p---> paste  the line
 yw---> copy the word
 ===========================
+
 du -sh <directory name> ---> check actual size of  the directory with all its content
+stat filename or directory name
 
 working with DNS:
 =================
@@ -195,11 +197,11 @@ When the system crashes, the possibility of file system corruption is less becau
  
 shortcuts: links-->1)soft link and 2)hard link 
 soft link -->used to create a short cut of the file and directory which is buried in the long path directory.this soft link has different inode numbers for source file and destination file if source file is deleted then from destination file data can't be accessed 
-
+file refers to another file ,file and directories and file systems can be linked
 command : ln -s <sourcefile> <destinationfile>
 
 hard link--> it is also similar to the soft link but the difference is source and destination files have different inode number associated and also if source file is deleted then also the from destination file the data can be accessed
-
+             multiple names reffered to same inode number and folders and devices can't be hard linked 
 command: ln <sourcefile> <destinationfile>
 
 load on the server: the no of proceesses currently waiting to be executed by cpu because 1 cpu can only execute 1 process at a time ..more the processes are waiting to be executed means server is loaded heavily and lesser the no of processes are waiting means lighter load on the server 
@@ -606,13 +608,107 @@ grep <string> <filename> --> to search the string
 grep -i <string> <filename>  --> to ingnore the case sensitive
 grep -v <string> <filename>  --> to get the the output except the string line
 grep -ir <string> <directory_name>  ---> to search the string recurssively
+grep -w <string> <file name>  ---> to search a exact string 
  ^ --> begining of the line
  $  --> end of the line
  ^$ --> balnk lines
- 
+  *    The preceding item will be matched zero or more times.
+ +    The preceding item will be matched one or more times.
+ .    is used for periods instead of regular expression it matches everything as period 
+ ?      The preceding item is optional and matched at most once
+
+ special regular expresions: 
+ =========================== 
+ Basic vs Extended Regular Expressions
+       In basic regular expressions the meta-characters ?, +, {, |, (, and )  lose  their  special
+       meaning; instead use the backslashed versions \?, \+, \{, \|, \(, and \).
+
  grep "^rsra" <filename> --> shows the lines which begins with sra
- grep "kumar.$" <filename>  --> shows the lins ends with kumar
+ grep "kumar$" <filename>  --> shows the lins ends with kumar
  grep "^$" <filename> -->shows the blank lines
+ .    is used for periods instead of regular expression it matches everything as period 
+ grep -ri "c..t" /etc
+ \.   is used to for exact matching of .  {backslash is used to tell dont consider this as period instead consider this as regulat expression}
+ grep -ir "\."  /etc
+ *    The preceding item will be matched zero or more times.
+ grep -r "/.*/" /etc
+ grep -r  instal* /etc
+ grep -r "10*"  /etc/passwd
+
+ +    The preceding item will be matched one or more times.
+grep -r "instal\+" /etc
+grep -r "10\+" /etc/passwd
+
+?      The preceding item is optional and matched at most once
+grep -r "port\?" /etc
+
+{n}    The preceding item is matched exactly n times.
+grep  "10\{2\}" /etc/passwd
+{n,}   The preceding item is matched n or more times.
+grep  "10\{2,\}" /etc/passwd
+{,m}   The preceding item is matched at most m times.not more than m times
+grep  "10\{,2\}" /etc/passwd
+{n,m}  The preceding item is matched at least n times, but not more than m times.
+grep  "10\{2,3\}" /etc/passwd
+
+problem faced during grep is some special characters are allowed to do some funtionality like . + *  to say these funtionalities to work we need use 
+escape character to make understand to the grep other wise it consider as noraml expression  but here we will get comfuse some times incase of . and * +
+to avoid " . "funtionality we use escape charactor "\"  to make effect the * + funtionalities we need to use "\" so avoid this we are going for egrep or grep -E it automatically adjust
+
+.   is used to for exact matching of .
+grep -Eir "."  /etc
+
+ +    The preceding item will be matched one or more times.
+grep -Er "10+" /etc/ or egrep -r "10+" /etc/
+
+?      The preceding item is optional and matched at most once
+grep -Er "port?" /etc  or egrep -r "port?" /etc/
+
+{n}    The preceding item is matched exactly n times.
+grep -Er "10{2}" /etc
+
+{n,}   The preceding item is matched n or more times.
+grep -Er "10{2,}" /etc
+
+{,m}   The preceding item is matched at most m times.not more than m times
+grep -Er "10{,2}" /etc
+
+{n,m}  The preceding item is matched at least n times, but not more than m times.
+grep -Er "10{2,5}" /etc
+
+  |  match one or other string
+grep -Er "enabled|disabled" /etc/
+grep -r "enabled?|disabled?" /etc/ 
+
+To search range or set   [a-z] or [A-Z] or [0-9]
+grep -iEr "c[ua]t" /etc
+grep -iEr "/dev/[a-z]*" /etc
+grep -iEr "/dev/[a-z]*[0-9]" /etc
+grep -iEr "/dev/[a-z]*[0-9]?" /etc
+grep -iEr "/dev/([a-z]*[0-9]?)*" /etc
+grep -Er "/dev/([a-z]|[A-z])*([0-9]?)*" /etc
+
+grep -Er "http[^s]" /etc         {http[^s]=http    not equal to https}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
 
 linux booting process:
 =====================
@@ -623,12 +719,51 @@ linux booting process:
 5)init
 6)RUNLEVEL
 
-/etc/rcN.d. (Replace the N with the run-level)
+all the deamon processes started during boot are located in /etc/rcN.d. (Replace the N with the run-level)
+ie ,rc0.d/ rc1.d/ rc2.d/ rc3.d/ rc4.d/ rc5.d/ rc6.d/ rcS.d/ 
 In each run-level you will find a series of if links pointing to start-up scripts located in /etc/init.d. 
 The names of these links all start as either K or S, followed by a number. 
-If the name of the link starts with an S, then that indicates the service will be started when you go into that run level.
- If the name of the link starts with a K, the service will be killed (if running).
+If the name of the link starts with an S, then that indicates the service will be started when you go into that run level.ex:(S01dbus   )
+If the name of the link starts with a K, the service will be killed because it is disabled with systemctl command (if running).ex:(K01speech-dispatcher   )
+that is why rc.0 and rc.6 directory files starts with K because init 0 is poweroff and init 6 is reboot
 there are 8 run levels means mode of server
+/etc/rcN.d/* -->linked to-->/etc/init.d/binaryfile 
+
+understand the service file defination and how it linked with booting:
+=====================================================================
+[Unit]
+Description= description for service 
+
+[Service]     --->define the service parameyers
+Restart=always   -->action taken by systemd service when it is stopped
+User=prometheus  ---> by default root is the owner of process if not specify so for security we allocate seperate user for processes owner
+ExecStart=/usr/local/bin/alertmanager --config.file=/etc/alertmanager/alertmanager.yml --storage.path=/var/lib/alertmanager         
+ExecReload=/bin/kill -HUP $MAINPID
+TimeoutStopSec=20s
+SendSIGKILL=no
+
+[Install]              --> defines the when service is enabled in which run level it has to start ex: mutli-user.target   or graphical.target      
+WantedBy=multi-user.target     --> if you enable service in rcN.d the file related to service in /etc/init.d/  is linked to respected runlevel defined in service file in install section
+                                    the file name starts with S and followed by some sequence number then service name 
+                                    if you disable the service that respected service /etc/init.d/service-file is linked to respected run level rcN.d and file name starts with K followed by 
+                                    sequence number and the service name
+                              
+switch from run level 5 to 3 and check default run level:
+========================================================
+systemctl get-default  -->To view the default target
+systemctl set-default multi-user.target    -->3 rd run level
+systemctl set-default 
+systemctl isolate multi-user.target   --> switch to multi-user.target
+systemctl isolate graphical.target    --> switch to graphical.target
+
+
+Run level 0 is matched by poweroff.target (and runlevel0.target is a symbolic link to poweroff.target).
+Run level 1 is matched by rescue.target (and runlevel1.target is a symbolic link to rescue.target).
+Run level 3 is emulated by multi-user.target (and runlevel3.target is a symbolic link to multi-user.target).
+Run level 5 is emulated by graphical.target (and runlevel5.target is a symbolic link to graphical.target).
+Run level 6 is emulated by reboot.target (and runlevel6.target is a symbolic link to reboot.target).
+Emergency is matched by emergency.target.
+
 
 RUNLEVEL:
 ========
@@ -689,13 +824,24 @@ IO Redirection:
 ----------------
 >   ---> overwrites the content
 >>  ---> appends the content
+0 is stdin
+1 is stdout
+2 is stderr
+
+This “ 1> ” operator is also used for redirecting standard output.
 
 Redirect stdoutput  echo "hi sravan" > sravan.txt      --> overwrites data
 Redirect stdout echo "hi sravan" >> sravan.txt         --> appends data
 
+This “ 1> ” operator is also used for redirecting standard output.
+echo "hi sravan" 1> sravan.txt
+
+less < /etc/passwd same as less 0< /etc/passwd
+
 Redirect  stderror cat srvan.txt 2> error.txt   --> overwrites err data
 redirect  stderro cat srvan.txt 2>> error.txt   --> appends err data
 not to print on terminal and not to redirect to file     cat srvan.txt 2>> /dev/null
+
 
 tee command is used to redirect output to file as well as  print on the screen
 
@@ -849,9 +995,58 @@ session needed:
 Awk sed grep egrep,find logrotate
  logrotate
  logical volumes
+ Pipeline Shared Libraries 
 
  sessions needed from sampath anna:
  ==================================
  1) iptables live session and writing rules outbount , inbound , forward ,postroute and preroute
  2) live session on error codes and understanding the issues and trouble shooting
- 3)interfaces in linux 
+ 3) interfaces in linux 
+ 4) booting and grub configuration in linux
+ 5)linux shortcut while using servers and hacks in linux while you are handling anything
+
+
+
+linux linux foundation certified system administartor:
+=====================================================
+console  --->console appear in booting, after booting press ctrl + alt + F12 then gives virtual terminal 
+in linux laptop if open terminal there we can fire commands 
+
+hostnamectl
+mandb
+apropos ssh
+mandb
+
+pipeline {
+  agent any
+  environment {
+    company = 'fournine'
+    project = 'shipwire'
+  }
+  stages {
+    stage('stage 1') {
+      steps {
+        sh 'echo $company'
+        sh 'env | sort'
+      }
+    }
+  }
+}
+
+
+run a job on multliple nodes simultlineously
+
+JENKINS:
+========
+create view and adding jobs in it
+trigger build in jenkins: using jenkins ui and api token authentication and jenkins cli
+restart jenkins jenkinsurl/restart  --> free style job aborted and wont starts 
+Restart using   jenkinsurl/safeRestart  --> waits until free style job completes and restarts
+hint : any how pipeline project statrs again from where it stopped when it restarted so we need to only takecare of freestyle
+rename job in jenkins
+Integrating Dastardly with Jenkins  [not completed pls review]
+Create Gitea Organization Folder job
+create webhook
+post sections in jenkins
+environment variables 
+credentials passed as enironment variables
